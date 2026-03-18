@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Healthy Eating at School</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>Healthy Eating at School</h1>
+
+<p>
+Even when school food includes chicken tenders, tacos, chicken sandwiches,
+fries, and quesadillas, you can still make balanced choices.
+</p>
+
+<h2>Common School Foods</h2>
+
+<ul>
+<li><b>Chicken Tenders</b> – good protein but often fried</li>
+<li><b>Tacos</b> – balanced if they include vegetables</li>
+<li><b>Chicken Sandwich</b> – protein and energy</li>
+<li><b>Fries</b> – best as a side food</li>
+<li><b>Quesadillas</b> – carbs and cheese for energy</li>
+</ul>
+
+<h2>Live Food Camera Classifier</h2>
+<p>Turn on your camera, hold up a food item, and the model will try to identify it.</p>
+
+<button onclick="init()">Start Camera</button>
+<div id="webcam-container" style="margin-top: 20px;"></div>
+<p id="result">Camera is off.</p>
+
+<a href="/info">Nutrition Information</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+
+<script>
+const URL = "https://teachablemachine.withgoogle.com/models/BX2tVjtda/";
+
+let model, webcam, maxPredictions;
+
+async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
+
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
+
+    const flip = true;
+    webcam = new tmImage.Webcam(300, 300, flip);
+    await webcam.setup();
+    await webcam.play();
+    window.requestAnimationFrame(loop);
+
+    const webcamContainer = document.getElementById("webcam-container");
+    webcamContainer.innerHTML = "";
+    webcamContainer.appendChild(webcam.canvas);
+
+    document.getElementById("result").innerText = "Camera started. Hold up a food item.";
+}
+
+async function loop() {
+    webcam.update();
+    await predict();
+    window.requestAnimationFrame(loop);
+}
+
+async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+
+    let bestPrediction = prediction[0];
+    for (let i = 1; i < prediction.length; i++) {
+        if (prediction[i].probability > bestPrediction.probability) {
+            bestPrediction = prediction[i];
+        }
+    }
+
+    document.getElementById("result").innerText =
+        "Prediction: " + bestPrediction.className +
+        " (" + Math.round(bestPrediction.probability * 100) + "% confidence)";
+}
+</script>
+
+</body>
+</html>
+

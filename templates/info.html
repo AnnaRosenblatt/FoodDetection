@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nutrition Information</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>Nutrition Basics</h1>
+
+<h2>Important Nutrients</h2>
+
+<ul>
+<li>Protein helps your body grow and repair muscles</li>
+<li>Carbohydrates provide energy</li>
+<li>Healthy fats support brain function</li>
+<li>Vitamins and minerals support the immune system</li>
+<li>Water keeps your body hydrated and focused</li>
+</ul>
+
+<h2>Healthy Habits</h2>
+
+<ul>
+<li>Eat balanced meals</li>
+<li>Do not skip breakfast</li>
+<li>Drink water instead of sugary drinks</li>
+<li>Pay attention to portion sizes</li>
+<li>Try to include fruits or vegetables</li>
+</ul>
+
+ 
+<div class="chatbot-box">
+    <h3>Nutrition Helper Chatbot</h3>
+    <p>Ask questions like: “What should I eat if I’m tired?” or “Are fries unhealthy?”</p>
+
+    <div id="chat-log">
+        <div><strong>Bot:</strong> Hi! I’m here to help with healthy school eating, nutrition facts, and practical tips.</div>
+    </div>
+
+    <input type="text" id="user-input" placeholder="Type your question here">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<a href="/">Back Home</a>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("user-input");
+    const chatLog = document.getElementById("chat-log");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    chatLog.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+    chatLog.innerHTML += `<div><strong>Bot:</strong> ${data.reply}</div>`;
+
+    input.value = "";
+}
+
+document.getElementById("user-input").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+});
+</script>
